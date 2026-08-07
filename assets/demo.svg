@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800">
+  <defs>
+    <radialGradient id="bg"><stop stop-color="#182c52"/><stop offset=".5" stop-color="#07101f"/><stop offset="1" stop-color="#02050b"/></radialGradient>
+    <radialGradient id="planet" cx="35%" cy="28%"><stop stop-color="#d8ebff"/><stop offset=".18" stop-color="#5da8dd"/><stop offset=".55" stop-color="#244d83"/><stop offset="1" stop-color="#07101f"/></radialGradient>
+    <linearGradient id="ring"><stop stop-color="#5a8cc4" stop-opacity="0"/><stop offset=".24" stop-color="#d3e8f5" stop-opacity=".9"/><stop offset=".5" stop-color="#77a8d0" stop-opacity=".3"/><stop offset=".8" stop-color="#e1f0f9" stop-opacity=".7"/><stop offset="1" stop-color="#5a8cc4" stop-opacity="0"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="45"/></filter>
+  </defs>
+  <rect width="1280" height="800" fill="url(#bg)"/>
+  <g fill="#9dc9ff">
+    <circle cx="81" cy="102" r="1.8"/><circle cx="221" cy="208" r="1"/><circle cx="339" cy="91" r="1.4"/><circle cx="490" cy="172" r=".8"/><circle cx="1062" cy="124" r="1.5"/><circle cx="1168" cy="286" r="1"/><circle cx="918" cy="90" r=".8"/><circle cx="107" cy="641" r="1"/><circle cx="345" cy="709" r="1.7"/><circle cx="1120" cy="679" r="1.3"/><circle cx="885" cy="727" r=".8"/>
+  </g>
+  <ellipse cx="691" cy="407" rx="410" ry="112" fill="none" stroke="#3975b9" stroke-width="35" opacity=".17" transform="rotate(-11 691 407)" filter="url(#blur)"/>
+  <ellipse cx="691" cy="407" rx="410" ry="103" fill="none" stroke="url(#ring)" stroke-width="17" transform="rotate(-11 691 407)"/>
+  <circle cx="675" cy="397" r="207" fill="url(#planet)"/>
+  <path d="M490 317c67 15 178 16 339-7M474 375c104 24 251 18 400-24M477 449c100 35 253 38 382 4" fill="none" stroke="#8ac6ea" stroke-opacity=".16" stroke-width="12"/>
+  <ellipse cx="691" cy="407" rx="410" ry="103" fill="none" stroke="url(#ring)" stroke-width="17" transform="rotate(-11 691 407)" stroke-dasharray="520 790" stroke-dashoffset="-660"/>
+  <circle cx="604" cy="310" r="14" fill="#d9f5ff" opacity=".65" filter="url(#blur)"/>
+</svg>

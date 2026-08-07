@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070c">
+  <meta name="description" content="a cinematic, client-side ascii art studio for images and video.">
+  <title>ascii // signal studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23070b12'/%3E%3Cpath d='M7 23 14 8h4l7 15h-4l-1.6-4H12l-1.6 4zm6.2-7h5l-2.5-6z' fill='%237aa7ff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="space-field" aria-hidden="true">
+    <div class="aurora aurora-one"></div><div class="aurora aurora-two"></div>
+    <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+  </div>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="ascii signal studio home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><b>ascii</b><small>signal studio</small></span>
+      </a>
+      <div class="topbar-meta">
+        <span class="signal-pill"><i></i> local processing</span>
+        <button class="icon-button panel-toggle" id="panelToggle" type="button" aria-controls="controlPanel" aria-expanded="true" title="toggle controls">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M8 12h12M4 18h16"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="preview-column" aria-label="live preview">
+        <div class="preview-toolbar">
+          <div>
+            <span class="eyebrow">live transmission</span>
+            <h1>glyph field <span id="mediaName">asterion demo</span></h1>
+          </div>
+          <div class="toolbar-actions">
+            <div class="segmented compact" id="viewMode" aria-label="preview mode">
+              <button class="active" type="button" data-view="render">render</button>
+              <button type="button" data-view="compare">compare</button>
+              <button type="button" data-view="source">source</button>
+            </div>
+            <button class="icon-button" id="fullscreenButton" type="button" title="fullscreen preview">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="viewport-shell" id="viewportShell" data-view="render">
+          <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+          <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+          <div class="viewport-grid" aria-hidden="true"></div>
+          <div class="compare-label source-label">source</div>
+          <div class="compare-label render-label">glyph render</div>
+          <div class="canvas-pane source-pane"><canvas id="sourceCanvas"></canvas></div>
+          <div class="canvas-pane output-pane"><canvas id="outputCanvas" aria-label="ascii art output"></canvas></div>
+          <div class="viewport-hud" aria-hidden="true"><span>ch-09</span><span id="hudTime">00:00:00</span></div>
+        </div>
+
+        <div class="statusbar">
+          <div class="status-item"><span>grid</span><b id="gridStat">—</b></div>
+          <div class="status-item"><span>glyphs</span><b id="glyphStat">—</b></div>
+          <div class="status-item"><span>render</span><b id="renderStat">—</b></div>
+          <div class="status-item status-pulse"><i></i><span id="statusText">loading demo signal</span></div>
+        </div>
+      </section>
+
+      <aside class="control-panel" id="controlPanel" aria-label="ascii controls">
+        <div class="panel-head">
+          <div><span class="eyebrow">instrument rack</span><h2>signal controls</h2></div>
+          <button class="icon-button mobile-close" id="mobileClose" type="button" title="close controls">×</button>
+        </div>
+
+        <div class="panel-scroll">
+          <details class="control-section" open>
+            <summary><span class="section-index">00</span><span>local presets</span><i></i></summary>
+            <div class="section-body">
+              <div class="local-preset-save">
+                <input id="localPresetName" type="text" maxlength="32" autocomplete="off" placeholder="preset name" aria-label="preset name">
+                <button id="saveLocalPreset" type="button">save</button>
+              </div>
+              <div class="local-preset-list" id="localPresetList"></div>
+              <p class="local-preset-note">settings only · saved in this browser</p>
+            </div>
+          </details>
+
+          <details class="control-section" open>
+            <summary><span class="section-index">01</span><span>input</span><i></i></summary>
+            <div class="section-body">
+              <label class="drop-zone" id="dropZone" for="fileInput">
+                <input id="fileInput" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.mp4,.webm,.ogg,.ogv,image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/ogg">
+                <span class="upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 15v4h14v-4"/></svg></span>
+                <span><b>drop a signal</b><small>png, jpg, webp, gif, mp4, webm or ogg</small></span>
+                <em>browse</em>
+              </label>
+              <div class="inline-control video-only" hidden>
+                  <div><label for="performanceMode">performance mode</label><small>half density · skip alternate frames</small></div>
+                <label class="switch"><input id="performanceMode" type="checkbox"><span></span></label>
+              </div>
+            </div>
+          </details>
+
+          <details class="control-section" open>
+            <summary><span class="section-index">02</span><span>character field</span><i></i></summary>
+            <div class="section-body">
+              <div class="preset-grid" id="charsetPresets"></div>
+              <label class="field-label" for="customCharset">custom ordered ramp</label>
+              <textarea id="customCharset" class="mono-input" rows="2" spellcheck="false" placeholder="type characters from dark to light…"></textarea>
+              <div class="inline-control">
+                <div><label for="reverseRamp">reverse ramp</label><small>swap dark and light glyphs</small></div>
+                <label class="switch"><input id="reverseRamp" type="checkbox"><span></span></label>
+              </div>
+            </div>
+          </details>
+
+          <details class="control-section" open>
+            <summary><span class="section-index">03</span><span>color matrix</span><i></i></summary>
+            <div class="section-body">
+              <div class="segmented color-modes" id="colorMode">
+                <button type="button" data-color-mode="mono">mono</button>
+                <button type="button" data-color-mode="original">original</button>
+                <button type="button" data-color-mode="solid">solid</button>
+                <button class="active" type="button" data-color-mode="palette">palette</button>
+              </div>
+              <div class="color-row mode-solid" hidden>
+                <label for="solidColor">glyph color</label><input id="solidColor" type="color" value="#8fb7ff">
+              </div>
+              <div class="mode-palette">
+                <label class="field-label">palette preset</label>
+                <div class="palette-presets" id="palettePresets"></div>
+                <label class="field-label" for="paletteMapping">map palette by</label>
+                <select id="paletteMapping"><option value="luminance">luminance</option><option value="horizontal">horizontal position</option><option value="vertical">vertical position</option></select>
+                <div class="palette-editor">
+                  <div class="palette-track" id="paletteTrack" aria-label="custom palette stops"></div>
+                  <div class="palette-editor-actions"><span>drag stops to position</span><button id="addStop" type="button">+ add stop</button></div>
+                </div>
+              </div>
+              <label class="field-label" for="backgroundMode">background</label>
+              <div class="split-fields">
+                <select id="backgroundMode"><option value="gradient">palette gradient</option><option value="solid">solid</option><option value="transparent">transparent</option></select>
+                <input id="backgroundColor" type="color" value="#05070c" aria-label="background color">
+              </div>
+            </div>
+          </details>
+
+          <details class="control-section">
+            <summary><span class="section-index">04</span><span>bloom engine</span><i></i></summary>
+            <div class="section-body">
+              <div class="inline-control">
+                <div><label for="glowEnabled">layered glow</label><small>multi-pass bloom composite</small></div>
+                <label class="switch"><input id="glowEnabled" type="checkbox" checked><span></span></label>
+              </div>
+              <div class="range-control"><div><label for="glowBlur">radius</label><output for="glowBlur">10 px</output></div><input id="glowBlur" type="range" min="0" max="28" value="10"></div>
+              <div class="range-control"><div><label for="glowIntensity">intensity</label><output for="glowIntensity">48%</output></div><input id="glowIntensity" type="range" min="0" max="100" value="48"></div>
+              <div class="split-fields">
+                <select id="glowColorMode" aria-label="glow color source"><option value="auto">auto from glyph</option><option value="custom">custom color</option></select>
+                <input id="glowColor" type="color" value="#5d8fff" aria-label="custom glow color">
+              </div>
+              <label class="field-label" for="glowApplication">apply glow to</label>
+              <select id="glowApplication"><option value="bright">brightest glyphs</option><option value="all">all glyphs</option></select>
+              <div class="inline-control">
+                <div><label for="glowPulse">subtle pulse</label><small>animate bloom intensity</small></div>
+                <label class="switch"><input id="glowPulse" type="checkbox"><span></span></label>
+              </div>
+            </div>
+          </details>
+
+          <details class="control-section">
+            <summary><span class="section-index">05</span><span>adjustments</span><i></i></summary>
+            <div class="section-body">
+              <div class="range-control"><div><label for="columns">density</label><output for="columns">96 cols</output></div><input id="columns" type="range" min="32" max="180" value="96"></div>
+              <div class="range-control"><div><label for="fontSize">font size</label><output for="fontSize">10 px</output></div><input id="fontSize" type="range" min="6" max="18" value="10"></div>
+              <div class="range-control"><div><label for="lineHeight">line height</label><output for="lineHeight">1.0×</output></div><input id="lineHeight" type="range" min="80" max="150" value="100"></div>
+              <div class="range-control"><div><label for="letterSpacing">letter spacing</label><output for="letterSpacing">0.0 px</output></div><input id="letterSpacing" type="range" min="-2" max="5" step="0.25" value="0"></div>
+              <div class="range-control"><div><label for="brightness">brightness</label><output for="brightness">0</output></div><input id="brightness" type="range" min="-100" max="100" value="0"></div>
+              <div class="range-control"><div><label for="contrast">contrast</label><output for="contrast">0</output></div><input id="contrast" type="range" min="-100" max="100" value="12"></div>
+              <div class="range-control"><div><label for="gamma">gamma</label><output for="gamma">1.00</output></div><input id="gamma" type="range" min="30" max="250" value="100"></div>
+              <div class="split-fields">
+                <label class="inline-control compact-control"><span>invert</span><span class="switch"><input id="invert" type="checkbox"><span></span></span></label>
+                <select id="dithering" aria-label="dithering"><option value="none">no dithering</option><option value="ordered">ordered 4×4</option><option value="floyd">floyd–steinberg</option></select>
+              </div>
+            </div>
+          </details>
+
+          <details class="control-section" open>
+            <summary><span class="section-index">06</span><span>export bay</span><i></i></summary>
+            <div class="section-body export-grid">
+              <button class="export-button" id="copyText" type="button"><svg viewBox="0 0 24 24"><path d="M8 8h11v11H8zM5 16H4V5h11v1"/></svg><span><b>copy text</b><small>clipboard</small></span></button>
+              <button class="export-button" id="downloadText" type="button"><svg viewBox="0 0 24 24"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14"/></svg><span><b>plain text</b><small>.txt</small></span></button>
+              <button class="export-button" id="downloadPng" type="button"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM7 15l3-3 2 2 2-2 3 3M16 9h.01"/></svg><span><b>still image</b><small>.png</small></span></button>
+              <button class="export-button video-only" id="recordWebm" type="button" hidden><svg viewBox="0 0 24 24"><path d="M5 6h10v12H5zM15 10l4-2v8l-4-2"/></svg><span><b>record loop</b><small>.webm</small></span></button>
+              <div class="recording-progress" id="recordingProgress" hidden><div><i></i><span id="recordingLabel">recording… 0%</span><button id="stopRecording" type="button">stop</button></div><progress id="recordingBar" max="1" value="0"></progress></div>
+              <p class="compat-note" id="compatNote">exports stay on your device. video recording support is detected per browser.</p>
+            </div>
+          </details>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

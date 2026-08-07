@@ -1,0 +1,23 @@
+# operating system files
+.DS_Store
+Thumbs.db
+
+# editors
+.idea/
+.vscode/
+.history/
+*.swp
+*.swo
+*~
+
+# local environment and logs
+.env
+.env.*
+!.env.example
+*.log
+
+# optional tooling output
+node_modules/
+coverage/
+AGENTS.md
+dist/
