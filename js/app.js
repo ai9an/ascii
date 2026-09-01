@@ -19,6 +19,8 @@ let mediaKind = "image";
 let recorder = null;
 let toastTimer = 0;
 let activeLocalPresetId = "";
+const MAX_EXPORT_DIMENSION = 8192;
+const MAX_EXPORT_PIXELS = 40_000_000;
 
 function toast(message) {
   const element = byId("toast");
@@ -27,6 +29,37 @@ function toast(message) {
 }
 
 function setStatus(message) { byId("statusText").textContent = message; }
+
+function getSourceDimensions(source) {
+  return {
+    width: source?.videoWidth || source?.naturalWidth || source?.width || 1,
+    height: source?.videoHeight || source?.naturalHeight || source?.height || 1
+  };
+}
+
+function getPngExportPlan() {
+  if (!media.source) return null;
+  const base = renderer.measure(media.source, settings, 1, false);
+  const source = getSourceDimensions(media.source);
+  const selection = byId("pngResolution").value;
+  const requestedScale = selection === "source"
+    ? Math.max(source.width / base.naturalWidth, source.height / base.naturalHeight)
+    : Number(selection);
+  const limit = Math.min(
+    MAX_EXPORT_DIMENSION / base.width,
+    MAX_EXPORT_DIMENSION / base.height,
+    Math.sqrt(MAX_EXPORT_PIXELS / (base.width * base.height))
+  );
+  const scale = Math.max(.1, Math.min(requestedScale, limit));
+  const frame = renderer.measure(media.source, settings, scale, false);
+  return { ...frame, scale, limited: scale < requestedScale - .001 };
+}
+
+function updatePngDimensions() {
+  const plan = getPngExportPlan();
+  if (!plan) return;
+  byId("pngDimensions").textContent = `${plan.width.toLocaleString()} × ${plan.height.toLocaleString()} px${plan.limited ? " · browser-safe limit" : " · crisp glyph render"}`;
+}
 
 function cleanName(name) { return name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").toLowerCase(); }
 
@@ -53,6 +86,7 @@ function updateStats(frame) {
     const rest = Math.floor(seconds % 60).toString().padStart(2, "0");
     byId("hudTime").textContent = `00:${minutes}:${rest}`;
   }
+  updatePngDimensions();
 }
 
 function renderNow(time = performance.now()) {
@@ -340,7 +374,28 @@ function wireExports() {
     if (!renderer.lastFrame) return; await copyText(renderer.lastFrame.text); toast("ascii copied to clipboard");
   });
   byId("downloadText").addEventListener("click", () => { if (renderer.lastFrame) downloadText(renderer.lastFrame.text); });
-  byId("downloadPng").addEventListener("click", () => downloadPng(outputCanvas));
+  byId("pngResolution").addEventListener("change", updatePngDimensions);
+  byId("downloadPng").addEventListener("click", async () => {
+    if (!media.source) return;
+    const button = byId("downloadPng");
+    const label = button.querySelector("b");
+    const previousLabel = label.textContent;
+    button.disabled = true; label.textContent = "rendering…";
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const exportCanvas = document.createElement("canvas");
+    try {
+      const plan = getPngExportPlan();
+      const exportRenderer = new AsciiRenderer(exportCanvas);
+      exportRenderer.render(media.source, settings, performance.now(), { scale: plan.scale, performanceMode: false });
+      await downloadPng(exportCanvas);
+      toast(`png exported · ${plan.width.toLocaleString()} × ${plan.height.toLocaleString()} px`);
+    } catch (error) {
+      console.error(error); toast(error.message || "png export failed");
+    } finally {
+      exportCanvas.width = 1; exportCanvas.height = 1;
+      button.disabled = false; label.textContent = previousLabel;
+    }
+  });
   byId("recordWebm").addEventListener("click", async () => {
     if (!media.source || mediaKind !== "video") return;
     recorder = new WebmRecorder(outputCanvas, media.source, {

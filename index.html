@@ -190,6 +190,15 @@
           <details class="control-section" open>
             <summary><span class="section-index">06</span><span>export bay</span><i></i></summary>
             <div class="section-body export-grid">
+              <div class="export-resolution">
+                <label for="pngResolution">png resolution</label>
+                <select id="pngResolution">
+                  <option value="source">match source</option>
+                  <option value="2">2× render</option>
+                  <option value="4">4× render</option>
+                </select>
+                <small id="pngDimensions">calculating output…</small>
+              </div>
               <button class="export-button" id="copyText" type="button"><svg viewBox="0 0 24 24"><path d="M8 8h11v11H8zM5 16H4V5h11v1"/></svg><span><b>copy text</b><small>clipboard</small></span></button>
               <button class="export-button" id="downloadText" type="button"><svg viewBox="0 0 24 24"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14"/></svg><span><b>plain text</b><small>.txt</small></span></button>
               <button class="export-button" id="downloadPng" type="button"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM7 15l3-3 2 2 2-2 3 3M16 9h.01"/></svg><span><b>still image</b><small>.png</small></span></button>

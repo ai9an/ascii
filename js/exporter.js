@@ -16,7 +16,12 @@ export async function copyText(text) {
 }
 
 export function downloadPng(canvas, filename = "ascii-signal.png") {
-  canvas.toBlob((blob) => { if (blob) downloadBlob(blob, filename); }, "image/png");
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) { reject(new Error("the png could not be encoded.")); return; }
+      downloadBlob(blob, filename); resolve(blob);
+    }, "image/png");
+  });
 }
 
 export function supportedWebmType() {

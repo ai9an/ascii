@@ -99,20 +99,29 @@ export class AsciiRenderer {
     this.lastFrame = null;
   }
 
-  render(source, settings, time = performance.now()) {
-    const started = performance.now();
+  measure(source, settings, scale = 1, performanceMode = settings.performanceMode) {
     const dimensions = sourceDimensions(source);
-    const columns = Math.max(16, Math.round(settings.columns * (settings.performanceMode ? .55 : 1)));
-    const fontSize = settings.fontSize;
-    const cellWidth = Math.max(2, fontSize * .615 + settings.letterSpacing);
-    const cellHeight = Math.max(fontSize * .75, fontSize * settings.lineHeight);
+    const columns = Math.max(16, Math.round(settings.columns * (performanceMode ? .55 : 1)));
+    const fontSize = settings.fontSize * scale;
+    const cellWidth = Math.max(2, settings.fontSize * .615 + settings.letterSpacing) * scale;
+    const cellHeight = Math.max(settings.fontSize * .75, settings.fontSize * settings.lineHeight) * scale;
 
     // A monospace glyph cell is much taller than it is wide. Rows are derived from the
     // rendered cell dimensions (not simply source pixels) so the final canvas preserves
     // the source aspect ratio instead of stretching the artwork vertically.
     const rows = Math.max(4, Math.round((dimensions.height / dimensions.width) * (columns * cellWidth) / cellHeight));
-    const width = Math.max(1, Math.ceil(columns * cellWidth));
-    const height = Math.max(1, Math.ceil(rows * cellHeight));
+    const naturalWidth = columns * cellWidth;
+    const naturalHeight = rows * cellHeight;
+    const width = Math.max(1, Math.ceil(naturalWidth));
+    const height = Math.max(1, Math.ceil(naturalHeight));
+    return { columns, rows, width, height, naturalWidth, naturalHeight, fontSize, cellWidth, cellHeight };
+  }
+
+  render(source, settings, time = performance.now(), options = {}) {
+    const started = performance.now();
+    const scale = Math.max(.1, Number(options.scale) || 1);
+    const performanceMode = options.performanceMode ?? settings.performanceMode;
+    const { columns, rows, width, height, fontSize, cellWidth, cellHeight } = this.measure(source, settings, scale, performanceMode);
     resizeCanvas(this.sampleCanvas, columns, rows);
     resizeCanvas(this.canvas, width, height);
     resizeCanvas(this.sharpCanvas, width, height);
@@ -190,10 +199,10 @@ export class AsciiRenderer {
       // This retains a crisp glyph core and avoids the muddy result of text shadowBlur.
       context.save();
       context.globalCompositeOperation = "lighter";
-      context.filter = `blur(${Math.max(1, settings.glowBlur * .52)}px)`;
+      context.filter = `blur(${Math.max(1, settings.glowBlur * scale * .52)}px)`;
       context.globalAlpha = settings.glowIntensity * pulse * .7;
       context.drawImage(this.glowCanvas, 0, 0);
-      context.filter = `blur(${Math.max(2, settings.glowBlur * 1.35)}px)`;
+      context.filter = `blur(${Math.max(2, settings.glowBlur * scale * 1.35)}px)`;
       context.globalAlpha = settings.glowIntensity * pulse * .33;
       context.drawImage(this.glowCanvas, 0, 0);
       context.restore();
